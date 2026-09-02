@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserMeResponse } from "../../src/core/ApiSchemas";
+import { CloseCode, CloseReason } from "../../src/core/CloseCodes";
 
 const apiMocks = vi.hoisted(() => ({
   getUserMe: vi.fn(),
@@ -185,7 +186,7 @@ describe("MatchmakingModal clan-aware joins", () => {
     window.addEventListener("show-message", showMessage);
 
     const { modal, socket } = await openAndJoin("2v2");
-    socket.serverClose(1008, "invalid_clan");
+    socket.serverClose(CloseCode.InvalidClan, CloseReason.InvalidClan);
 
     await vi.waitFor(() => expect(apiMocks.getUserMe).toHaveBeenCalledTimes(2));
     await vi.waitFor(() =>
@@ -205,7 +206,10 @@ describe("MatchmakingModal clan-aware joins", () => {
     window.addEventListener("show-message", showMessage);
 
     const { modal, socket } = await openAndJoin("2v2");
-    socket.serverClose(1011, "clan_verification_failed");
+    socket.serverClose(
+      CloseCode.ClanVerificationFailed,
+      CloseReason.ClanVerificationFailed,
+    );
     await vi.runAllTimersAsync();
 
     expect(modal.isOpen()).toBe(false);
